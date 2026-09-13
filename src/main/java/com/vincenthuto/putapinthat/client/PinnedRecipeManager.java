@@ -6,7 +6,6 @@ import com.vincenthuto.putapinthat.pin.PinnedRecipeKey;
 import com.vincenthuto.putapinthat.pin.PinnedRecipeList;
 import com.vincenthuto.putapinthat.pin.PinnedRecipeStore;
 import mezz.jei.api.gui.IRecipeLayoutDrawable;
-import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.runtime.IJeiRuntime;
@@ -20,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.WeakHashMap;
 
 public final class PinnedRecipeManager {
     private static final PinnedRecipeManager INSTANCE = new PinnedRecipeManager();
@@ -28,7 +28,9 @@ public final class PinnedRecipeManager {
     private final PinnedRecipeList pins = new PinnedRecipeList(MAX_PINS);
     private final PinnedRecipeStore store = new PinnedRecipeStore(savePath());
     private final Map<PinnedRecipeKey, IRecipeLayoutDrawable<?>> layouts = new LinkedHashMap<>();
+    private final Map<IRecipeLayoutDrawable<?>, Optional<PinnedRecipeKey>> identities = new WeakHashMap<>();
     private IJeiRuntime runtime;
+    private boolean rebuildPending;
 
     private PinnedRecipeManager() {
     }
@@ -39,16 +41,20 @@ public final class PinnedRecipeManager {
 
     public void load() {
         pins.replaceLoaded(store.load());
+        rebuildPending = runtime != null;
     }
 
     public void setRuntime(IJeiRuntime runtime) {
         this.runtime = runtime;
-        rebuildLayouts();
+        layouts.clear();
+        rebuildPending = true;
     }
 
     public void clearRuntime() {
         runtime = null;
+        rebuildPending = false;
         layouts.clear();
+        identities.clear();
     }
 
     public PinToggleResult toggle(IRecipeLayoutDrawable<?> layout) {
@@ -115,22 +121,19 @@ public final class PinnedRecipeManager {
     }
 
     public void tick() {
+        if (rebuildPending && runtime != null) {
+            rebuildPending = false;
+            rebuildLayouts();
+        }
         layouts.values().forEach(IRecipeLayoutDrawable::tick);
     }
 
     private Optional<PinnedRecipeKey> keyOf(IRecipeLayoutDrawable<?> layout) {
-        var category = layout.getRecipeCategory();
-        var recipeId = getRecipeId(category, layout.getRecipe());
-        if (recipeId == null) {
+        if (runtime == null) {
             return Optional.empty();
         }
-        boolean hasIngredient = layout.getRecipeSlotsView().getSlotViews().stream()
-                .anyMatch(slot -> (slot.getRole() == RecipeIngredientRole.INPUT || slot.getRole() == RecipeIngredientRole.OUTPUT)
-                        && !slot.isEmpty());
-        if (!hasIngredient) {
-            return Optional.empty();
-        }
-        return Optional.of(new PinnedRecipeKey(category.getRecipeType().getUid(), recipeId));
+        return identities.computeIfAbsent(layout,
+                candidate -> RecipeIdentity.create(candidate, runtime.getIngredientManager()));
     }
 
     private void rebuildLayouts() {
@@ -145,10 +148,19 @@ public final class PinnedRecipeManager {
 
     private <T> void resolve(PinnedRecipeKey key, RecipeType<T> type) {
         IRecipeCategory<T> category = runtime.getRecipeManager().getRecipeCategory(type);
+        if (!RecipeIdentity.isSynthetic(key)) {
+            runtime.getRecipeManager().createRecipeLookup(type).includeHidden().get()
+                    .filter(recipe -> key.recipeId().equals(category.getRegistryName(recipe)))
+                    .findFirst()
+                    .flatMap(recipe -> createLayout(category, recipe))
+                    .ifPresent(layout -> layouts.put(key, layout));
+            return;
+        }
         runtime.getRecipeManager().createRecipeLookup(type).includeHidden().get()
-                .filter(recipe -> key.recipeId().equals(category.getRegistryName(recipe)))
+                .map(recipe -> createLayout(category, recipe))
+                .flatMap(Optional::stream)
+                .filter(layout -> keyOf(layout).filter(key::equals).isPresent())
                 .findFirst()
-                .flatMap(recipe -> createLayout(category, recipe))
                 .ifPresent(layout -> layouts.put(key, layout));
     }
 
@@ -166,10 +178,6 @@ public final class PinnedRecipeManager {
 
     private <T> void createBookmarkLayout(PinnedRecipeKey key, RecipeBookmark<T, ?> bookmark) {
         createLayout(bookmark.getRecipeCategory(), bookmark.getRecipe()).ifPresent(layout -> layouts.put(key, layout));
-    }
-
-    private static <T> net.minecraft.resources.ResourceLocation getRecipeId(IRecipeCategory<T> category, Object recipe) {
-        return category.getRegistryName(category.getRecipeType().getRecipeClass().cast(recipe));
     }
 
     private void save() {

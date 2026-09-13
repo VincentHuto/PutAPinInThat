@@ -36,6 +36,14 @@ mixin {
 
 repositories {
     maven { url = 'https://maven.blamejared.com' }
+    maven {
+        name = 'Curse Maven'
+        url = 'https://www.cursemaven.com'
+        content { includeGroup 'curse.maven' }
+    }
+    flatDir {
+        dirs file('../Hemomancy/libs')
+    }
 }
 
 dependencies {
@@ -48,6 +56,12 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-lib:${jei_version}")
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common:${jei_version}")
     runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
+
+    // Development runtime only: modded JEI recipe compatibility checks.
+    runtimeOnly fg.deobf("curse.maven:mana-and-artifice-406360:${mna_file_id}")
+    runtimeOnly fg.deobf("curse.maven:curios-309927:${curios_file_id}")
+    runtimeOnly fg.deobf("curse.maven:geckolib-388172:${geckolib_file_id}")
+    runtimeOnly fg.deobf("com.aranaira:magichem:${magichem_version}")
 
 }
 
