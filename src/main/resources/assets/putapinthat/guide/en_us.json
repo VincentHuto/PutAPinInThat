@@ -1,0 +1,17 @@
+{
+  "PutAPinInThat: Pinning JEI Recipes": {
+    "index": 900,
+    "category": "basics",
+    "tier": 1,
+    "sections": [
+      {
+        "type": "title",
+        "value": "Pinning JEI Recipes"
+      },
+      {
+        "type": "text",
+        "value": "Put A Pin In That works with JEI recipes added by other mods, including Mana and Artifice. Open any supported modded recipe in JEI and use the pin button, or press P while hovering it, to keep the recipe visible on your HUD."
+      }
+    ]
+  }
+}
