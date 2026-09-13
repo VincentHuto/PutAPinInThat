@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.vincenthuto.putapinthat.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "putapinthat.refmap.json",
+  "client": [
+    "BookmarkOverlayAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

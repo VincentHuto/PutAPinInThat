@@ -1,0 +1,10 @@
+{
+  "key.categories.putapinthat": "Put A Pin In That",
+  "key.putapinthat.pin_recipe": "Pin or unpin hovered JEI recipe",
+  "tooltip.putapinthat.pin": "Pin recipe",
+  "tooltip.putapinthat.unpin": "Unpin recipe",
+  "tooltip.putapinthat.clear": "Clear pinned recipes",
+  "message.putapinthat.pinned": "Recipe pinned",
+  "message.putapinthat.unpinned": "Recipe unpinned",
+  "message.putapinthat.unsupported": "This recipe cannot be pinned"
+}

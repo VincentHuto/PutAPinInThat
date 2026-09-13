@@ -1,0 +1,75 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
+}
+
+version = mod_version
+group = mod_group_id
+base { archivesName = mod_id }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: mapping_channel, version: mapping_version
+    copyIdeResources = true
+
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'info'
+            arg '-mixin.config=putapinthat.mixins.json'
+            mods { "${mod_id}" { source sourceSets.main } }
+        }
+        client { args '--username', 'Huto' }
+        server { args '--nogui' }
+    }
+}
+
+mixin {
+    add sourceSets.main, 'putapinthat.refmap.json'
+    config 'putapinthat.mixins.json'
+}
+
+repositories {
+    maven { url = 'https://maven.blamejared.com' }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-gui:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-lib:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common:${jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
+
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    def props = [minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
+                 forge_version: forge_version, forge_version_range: forge_version_range,
+                 loader_version_range: loader_version_range, jei_version_range: jei_version_range,
+                 mod_id: mod_id, mod_name: mod_name, mod_license: mod_license,
+                 mod_version: mod_version, mod_authors: mod_authors,
+                 mod_description: mod_description]
+    inputs.properties props
+    filesMatching('META-INF/mods.toml') { expand props }
+}
+
+tasks.named('jar', Jar).configure {
+    manifest.attributes(
+            'Specification-Title': mod_id,
+            'Specification-Vendor': mod_authors,
+            'Specification-Version': '1',
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.jar.archiveVersion,
+            'Implementation-Vendor': mod_authors,
+            'MixinConfigs': 'putapinthat.mixins.json')
+    finalizedBy 'reobfJar'
+}
