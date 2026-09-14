@@ -55,16 +55,13 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-gui:${jei_version}")
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-lib:${jei_version}")
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common:${jei_version}")
-    compileOnly fg.deobf("curse.maven:mana-and-artifice-406360:${mna_file_id}")
     runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
 
     // Development runtime only: modded JEI recipe compatibility checks.
-    if (providers.gradleProperty('include_mna_runtime').map(String::toBoolean).getOrElse(true)) {
-        runtimeOnly fg.deobf("curse.maven:mana-and-artifice-406360:${mna_file_id}")
-        runtimeOnly fg.deobf("curse.maven:curios-309927:${curios_file_id}")
-        runtimeOnly fg.deobf("curse.maven:geckolib-388172:${geckolib_file_id}")
-        runtimeOnly fg.deobf("com.aranaira:magichem:${magichem_version}")
-    }
+    runtimeOnly fg.deobf("curse.maven:mana-and-artifice-406360:${mna_file_id}")
+    runtimeOnly fg.deobf("curse.maven:curios-309927:${curios_file_id}")
+    runtimeOnly fg.deobf("curse.maven:geckolib-388172:${geckolib_file_id}")
+    runtimeOnly fg.deobf("com.aranaira:magichem:${magichem_version}")
 
 }
 

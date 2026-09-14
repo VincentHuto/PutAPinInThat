@@ -32,10 +32,3 @@ mandatory=true
 versionRange="${jei_version_range}"
 ordering="AFTER"
 side="CLIENT"
-
-[[dependencies.${mod_id}]]
-modId="mna"
-mandatory=false
-versionRange="[3.1.11,)"
-ordering="AFTER"
-side="CLIENT"
