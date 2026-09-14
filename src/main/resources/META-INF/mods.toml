@@ -10,6 +10,7 @@ authors="${mod_authors}"
 displayTest="IGNORE_ALL_VERSION"
 clientSideOnly=true
 description='''${mod_description}'''
+logoFile="logo.png"
 
 [[dependencies.${mod_id}]]
 modId="forge"
