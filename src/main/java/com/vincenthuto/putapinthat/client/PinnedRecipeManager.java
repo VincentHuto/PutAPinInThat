@@ -109,12 +109,21 @@ public final class PinnedRecipeManager {
         save();
     }
 
-    public List<IRecipeLayoutDrawable<?>> getResolvedLayouts() {
-        List<IRecipeLayoutDrawable<?>> ordered = new ArrayList<>();
+    public boolean remove(PinnedRecipeKey key) {
+        if (!pins.remove(key)) {
+            return false;
+        }
+        layouts.remove(key);
+        save();
+        return true;
+    }
+
+    public List<ResolvedPin> getResolvedPins() {
+        List<ResolvedPin> ordered = new ArrayList<>();
         for (PinnedRecipeKey key : pins.entries()) {
             IRecipeLayoutDrawable<?> layout = layouts.get(key);
             if (layout != null) {
-                ordered.add(layout);
+                ordered.add(new ResolvedPin(key, layout));
             }
         }
         return List.copyOf(ordered);
@@ -194,5 +203,8 @@ public final class PinnedRecipeManager {
 
     private static Path savePath() {
         return FMLPaths.CONFIGDIR.get().resolve(PutAPinInThat.MOD_ID).resolve("pins.json");
+    }
+
+    public record ResolvedPin(PinnedRecipeKey key, IRecipeLayoutDrawable<?> layout) {
     }
 }

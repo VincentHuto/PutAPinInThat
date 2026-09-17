@@ -2,6 +2,7 @@ package com.vincenthuto.putapinthat.jei;
 
 import com.vincenthuto.putapinthat.PutAPinInThat;
 import com.vincenthuto.putapinthat.client.ClearPinsButtonTexture;
+import com.vincenthuto.putapinthat.client.ClosePinButtonTexture;
 import com.vincenthuto.putapinthat.client.PinTexture;
 import com.vincenthuto.putapinthat.client.PinnedRecipeManager;
 import mezz.jei.api.IModPlugin;
@@ -24,6 +25,7 @@ public final class PutAPinInThatJeiPlugin implements IModPlugin {
         var guiHelper = registration.getJeiHelpers().getGuiHelper();
         PinTexture.initialize(guiHelper);
         ClearPinsButtonTexture.initialize(guiHelper);
+        ClosePinButtonTexture.initialize(guiHelper);
         registration.addRecipeButtonFactory(PinRecipeButtonController::new);
     }
 

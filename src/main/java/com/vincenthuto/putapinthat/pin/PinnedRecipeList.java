@@ -30,6 +30,10 @@ public final class PinnedRecipeList {
         return entries.contains(key);
     }
 
+    public boolean remove(PinnedRecipeKey key) {
+        return entries.remove(key);
+    }
+
     public List<PinnedRecipeKey> entries() {
         return List.copyOf(entries);
     }

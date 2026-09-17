@@ -9,6 +9,7 @@ import mezz.jei.gui.recipes.RecipesGui;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -63,7 +64,15 @@ public final class ClientEvents {
 
     @SubscribeEvent
     public static void onMousePressed(ScreenEvent.MouseButtonPressed.Pre event) {
-        if (event.getButton() != GLFW.GLFW_MOUSE_BUTTON_LEFT || !canShowClearButton(event.getScreen())) {
+        if (event.getButton() != GLFW.GLFW_MOUSE_BUTTON_LEFT || !canInteractWithPins(event.getScreen())) {
+            return;
+        }
+        if (PinnedRecipeHud.removePinAt(
+                event.getMouseX(), event.getMouseY(), event.getScreen().width, event.getScreen().height)) {
+            event.setCanceled(true);
+            return;
+        }
+        if (!canShowClearButton(event.getScreen())) {
             return;
         }
         ClearButtonBounds bounds = ClearButtonBounds.forScreenHeight(event.getScreen().height);
@@ -100,6 +109,12 @@ public final class ClientEvents {
         return runtime != null && !manager.isEmpty()
                 && runtime.getBookmarkOverlay() instanceof BookmarkOverlay
                 && runtime.getScreenHelper().getGuiProperties(screen).isPresent();
+    }
+
+    static boolean canInteractWithPins(Screen screen) {
+        var runtime = PinnedRecipeManager.getInstance().getRuntime();
+        return runtime != null && (screen instanceof ChatScreen
+                || runtime.getScreenHelper().getGuiProperties(screen).isPresent());
     }
 
     private static void drawClearButton(GuiGraphics graphics, ClearButtonBounds bounds, boolean hovered) {
